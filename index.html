@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Letter Unspoken</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d0d12;
+            --bg-secondary: #1a1623;
+            --bg-accent: #2a1f3d;
+            --text-primary: #f8f5f0;
+            --text-secondary: #d4c5b9;
+            --text-muted: #9b8b7e;
+            --gold: #d4af37;
+            --gold-light: #f4d58d;
+            --gold-dark: #8b7355;
+            --rose: #d4a59a;
+            --rose-dark: #c08f82;
+            --purple: #8b7ba8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(212, 165, 154, 0.08) 0%, transparent 40%),
+                linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%);
+            z-index: 0;
+            will-change: transform;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            contain: layout style paint;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--gold-light);
+            border-radius: 50%;
+            opacity: 0;
+            animation: premiumTwinkle 4s infinite;
+            will-change: opacity, transform;
+        }
+
+        @keyframes premiumTwinkle {
+            0%, 100% { opacity: 0; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.3); }
+        }
+
+        .flower {
+            position: absolute;
+            opacity: 0.6;
+            pointer-events: none;
+            animation: floatFlower 20s infinite ease-in-out;
+            will-change: transform, opacity;
+        }
+
+        .flower::before {
+            content: '🌸';
+            font-size: 16px;
+            filter: drop-shadow(0 0 4px rgba(212, 165, 154, 0.3));
+        }
+
+        .flower.rose::before { content: '🌹'; }
+        .flower.blossom::before { content: '🌺'; }
+        .flower.small::before { font-size: 12px; }
+        .flower.large::before { font-size: 20px; }
+
+        @keyframes floatFlower {
+            0% { 
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { 
+                transform: translate(var(--tx), var(--ty)) rotate(var(--rot));
+                opacity: 0;
+            }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 6px var(--gold-light);
+            animation: sparkleFloat 15s infinite ease-in-out;
+            will-change: opacity, transform;
+        }
+
+        @keyframes sparkleFloat {
+            0%, 100% { 
+                opacity: 0;
+                transform: translateY(0) scale(1);
+            }
+            10%, 90% { opacity: 0.8; }
+            50% { transform: translateY(-80px) scale(1.3); }
+        }
+
+        .light-ray {
+            position: fixed;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(212, 175, 55, 0.08) 20%,
+                rgba(212, 175, 55, 0.03) 50%,
+                transparent 100%
+            );
+            opacity: 0;
+            animation: lightRay 8s ease-in-out infinite;
+            transform-origin: top;
+            will-change: opacity;
+        }
+
+        @keyframes lightRay {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.8; }
+        }
+
+        .page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            transform: scale(0.95);
+            contain: layout style paint;
+        }
+
+        .page.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        .page.fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .content {
+            max-width: 800px;
+            text-align: center;
+            position: relative;
+            background: rgba(26, 22, 35, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            box-shadow: 
+                0 0 40px rgba(212, 175, 55, 0.08),
+                0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: contentFloat 6s ease-in-out infinite;
+            will-change: transform;
+            contain: layout style;
+        }
+
+        @keyframes contentFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .content::before,
+        .content::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--gold);
+            opacity: 0.3;
+        }
+
+        .content::before {
+            top: 15px;
+            left: 15px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .content::after {
+            bottom: 15px;
+            right: 15px;
+            border-left: none;
+            border-top: none;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            will-change: filter;
+        }
+
+        p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(0.95rem, 2.2vw, 1.2rem);
+            line-height: 2;
+            margin-bottom: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .typewriter {
+            display: inline-block;
+            overflow: hidden;
+            white-space: pre-wrap;
+            border-right: 2px solid var(--gold);
+            animation: blink 0.8s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 50%, var(--gold-light) 100%);
+            border: 1px solid var(--gold-light);
+            color: var(--bg-primary);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 50px;
+            box-shadow: 
+                0 0 20px rgba(212, 175, 55, 0.2),
+                0 5px 20px rgba(0, 0, 0, 0.3);
+            will-change: transform;
+            contain: layout style;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -150%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                transparent 100%
+            );
+            transform: skewX(-20deg);
+            transition: all 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 150%;
+        }
+
+        .btn:hover {
+            transform: scale(1.03);
+            box-shadow: 
+                0 0 30px rgba(212, 175, 55, 0.3),
+                0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        #page1 h1 {
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        #page2 p, #page3 p {
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #page4 {
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(212, 165, 154, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%);
+        }
+
+        #page4 .content {
+            max-width: 800px;
+            padding: 3rem 2.5rem;
+        }
+
+        #page4 .quote {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            font-style: italic;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+            letter-spacing: 0.01em;
+            position: relative;
+        }
+
+        #page4 .quote::before {
+            content: '"';
+            font-size: 3rem;
+            position: absolute;
+            left: -30px;
+            top: -15px;
+            color: var(--gold);
+            opacity: 0.2;
+            font-family: 'Playfair Display', serif;
+        }
+
+        #page4 .pause {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        #page4 .pause::before {
+            content: '✦';
+            font-size: 1.2rem;
+            color: var(--gold);
+            opacity: 0;
+            animation: pauseSymbol 3s ease-in-out infinite;
+        }
+
+        @keyframes pauseSymbol {
+            0%, 100% { 
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% { 
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+        }
+
+        #page4 .final-quote {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 3.5vw, 2rem);
+            font-style: italic;
+            font-weight: 400;
+            color: var(--gold-light);
+            line-height: 1.6;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            letter-spacing: 0.02em;
+            margin-bottom: 2rem;
+        }
+
+        .fade-in {
+            animation: fadeInUp 2.5s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            will-change: opacity, transform;
+        }
+
+        @keyframes fadeInUp {
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        .delay-1 { animation-delay: 1.5s; }
+        .delay-2 { animation-delay: 3s; }
+        .delay-3 { animation-delay: 4.5s; }
+        .delay-4 { animation-delay: 6s; }
+        .delay-5 { animation-delay: 7.5s; }
+        .delay-6 { animation-delay: 9s; }
+
+        #page5 {
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(212, 165, 154, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%);
+        }
+
+        #page5 .content {
+            max-width: 800px;
+            padding: 3rem 2.5rem;
+        }
+
+        #page5 .final-quote {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.8rem);
+            font-style: italic;
+            font-weight: 400;
+            color: var(--gold-light);
+            line-height: 1.7;
+            text-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+            letter-spacing: 0.03em;
+            margin: 0;
+            text-align: center;
+        }
+
+        .black-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s ease;
+            z-index: 100;
+            will-change: opacity;
+        }
+
+        .black-screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .ornament {
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--gold-dark) 20%,
+                var(--gold) 50%, 
+                var(--gold-dark) 80%, 
+                transparent 100%);
+            margin: 2rem auto;
+            position: relative;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            animation: ornamentGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes ornamentGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .ornament::before,
+        .ornament::after {
+            position: absolute;
+            color: var(--gold);
+            font-size: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.6;
+        }
+
+        .ornament::before { 
+            content: '❋';
+            left: -25px;
+        }
+
+        .ornament::after { 
+            content: '❋'; 
+            right: -25px; 
+        }
+
+        .final-ornament {
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--gold-dark) 10%,
+                var(--gold) 30%, 
+                var(--gold-light) 50%, 
+                var(--gold) 70%,
+                var(--gold-dark) 90%, 
+                transparent 100%);
+            margin: 2rem auto;
+            position: relative;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .final-ornament::before,
+        .final-ornament::after {
+            position: absolute;
+            color: var(--gold);
+            font-size: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .final-ornament::before { 
+            content: '❋';
+            left: -30px;
+        }
+
+        .final-ornament::after { 
+            content: '❋'; 
+            right: -30px; 
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+                backdrop-filter: blur(5px);
+            }
+
+            .btn {
+                padding: 0.9rem 2.5rem;
+                font-size: 0.8rem;
+            }
+
+            .star {
+                animation-duration: 6s;
+            }
+
+            .flower {
+                animation-duration: 25s;
+            }
+
+            .sparkle {
+                animation-duration: 20s;
+            }
+
+            .light-ray {
+                display: none;
+            }
+
+            @keyframes contentFloat {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-5px); }
+            }
+
+            h1 {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+            }
+
+            p {
+                font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+                line-height: 1.8;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="stars" id="starfield"></div>
+
+    <div class="page active" id="page1">
+        <div class="content">
+            <h1 id="typewriter-text"></h1>
+            <div class="ornament"></div>
+            <button class="btn" onclick="goToPage(2)">✨ Continue</button>
+        </div>
+    </div>
+
+    <div class="page" id="page2">
+        <div class="content">
+            <p class="fade-in">I didn't plan to love you. It wasn't dramatic. It wasn't loud.</p>
+            <p class="fade-in delay-1">It was quiet. Like rain at night. Like a song only I could hear.</p>
+            <p class="fade-in delay-2">Somewhere between your laugh and the way you say my name, my heart decided.</p>
+            <div class="ornament fade-in delay-3"></div>
+            <button class="btn fade-in delay-3" onclick="goToPage(3)">Continue</button>
+        </div>
+    </div>
+
+    <div class="page" id="page3">
+        <div class="content">
+            <h1 class="fade-in">Love You😘</h1>
+            <div class="ornament fade-in delay-1"></div>
+            <p class="fade-in delay-1">This is not a request. Not a persuasion. Not a "please choose me."</p>
+            <p class="fade-in delay-2">Love is not something you owe anyone.</p>
+            <p class="fade-in delay-3">If your heart doesn't beat the same way, that is okay.</p>
+            <p class="fade-in delay-4">I would rather lose you honestly than keep you unfairly.</p>
+            <button class="btn fade-in delay-4" onclick="goToPage(4)">Continue</button>
+        </div>
+    </div>
+
+    <div class="page" id="page4">
+        <div class="content">
+            <div class="quote fade-in">
+                Maybe in another universe,<br>
+                we met at the right time.
+            </div>
+            <div class="quote fade-in delay-1">
+                With the right hearts.<br>
+                Without fear.
+            </div>
+            <div class="ornament fade-in delay-2"></div>
+            <div class="quote fade-in delay-3">
+                And maybe there,<br>
+                you loved me too.
+            </div>
+            <div class="pause fade-in delay-4"></div>
+            <div class="final-quote fade-in delay-5">
+                But in this one,<br>
+                I will simply thank you<br>
+                for existing.
+            </div>
+            <button class="btn fade-in delay-6" onclick="fadeToBlack()">Pakhii💕</button>
+        </div>
+    </div>
+
+    <div class="page" id="page5">
+        <div class="content">
+            <div class="final-ornament fade-in"></div>
+            <p class="final-quote fade-in delay-1">
+                Some loves are meant to be felt, not kept.
+                plz Hea Bolo😔
+            </p>
+            <div class="final-ornament fade-in delay-2"></div>
+        </div>
+    </div>
+
+    <div class="black-screen" id="blackScreen"></div>
+
+    <script>
+        const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || 
+                             navigator.maxTouchPoints > 0 ||
+                             'ontouchstart' in window;
+
+        const isMobile = window.innerWidth <= 768 || isTouchDevice;
+
+        const CONFIG = {
+            stars: isMobile ? 30 : 80,
+            flowers: isMobile ? 8 : 18,
+            sparkles: isMobile ? 12 : 25,
+            lightRays: isMobile ? 0 : 5
+        };
+
+        function createStars() {
+            const starfield = document.getElementById('starfield');
+
+            for (let i = 0; i < CONFIG.stars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 3) + 's';
+
+                const size = Math.random() * 1.5 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+
+                starfield.appendChild(star);
+            }
+        }
+
+        function createFlowers() {
+            const starfield = document.getElementById('starfield');
+            const flowerTypes = ['', 'rose', 'blossom'];
+            const flowerSizes = ['small', '', 'large'];
+
+            for (let i = 0; i < CONFIG.flowers; i++) {
+                const flower = document.createElement('div');
+                flower.className = 'flower';
+
+                const type = flowerTypes[Math.floor(Math.random() * flowerTypes.length)];
+                const size = flowerSizes[Math.floor(Math.random() * flowerSizes.length)];
+                if (type) flower.classList.add(type);
+                if (size) flower.classList.add(size);
+
+                flower.style.left = Math.random() * 100 + '%';
+                flower.style.top = Math.random() * 100 + '%';
+
+                const translateX = (Math.random() - 0.5) * 300;
+                const translateY = -(Math.random() * 400 + 200);
+                const rotate = Math.random() * 360 - 180;
+
+                flower.style.setProperty('--tx', translateX + 'px');
+                flower.style.setProperty('--ty', translateY + 'px');
+                flower.style.setProperty('--rot', rotate + 'deg');
+
+                flower.style.animationDelay = Math.random() * 15 + 's';
+                flower.style.animationDuration = (Math.random() * 10 + 15) + 's';
+
+                starfield.appendChild(flower);
+            }
+        }
+
+        function createSparkles() {
+            const starfield = document.getElementById('starfield');
+
+            for (let i = 0; i < CONFIG.sparkles; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 10 + 's';
+                sparkle.style.animationDuration = (Math.random() * 8 + 10) + 's';
+                starfield.appendChild(sparkle);
+            }
+        }
+
+        function createLightRays() {
+            if (CONFIG.lightRays === 0) return;
+
+            const starfield = document.getElementById('starfield');
+
+            for (let i = 0; i < CONFIG.lightRays; i++) {
+                const ray = document.createElement('div');
+                ray.className = 'light-ray';
+                ray.style.left = (i * (100 / CONFIG.lightRays)) + '%';
+                ray.style.animationDelay = (i * 1.5) + 's';
+                starfield.appendChild(ray);
+            }
+        }
+
+        function typeWriter(text, element, speed = 80) {
+            let i = 0;
+            element.textContent = '';
+            element.classList.add('typewriter');
+
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    setTimeout(() => {
+                        element.classList.remove('typewriter');
+                    }, 500);
+                }
+            }
+            type();
+        }
+
+        function goToPage(pageNum) {
+            const currentPage = document.querySelector('.page.active');
+            const nextPage = document.getElementById(`page${pageNum}`);
+
+            currentPage.classList.add('fade-out');
+
+            setTimeout(() => {
+                currentPage.classList.remove('active', 'fade-out');
+                nextPage.classList.add('active');
+
+                const fadeElements = nextPage.querySelectorAll('.fade-in');
+                fadeElements.forEach(el => {
+                    el.style.animation = 'none';
+                    el.offsetHeight;
+                    el.style.animation = '';
+                });
+            }, 800);
+        }
+
+        function fadeToBlack() {
+            const page4 = document.getElementById('page4');
+            const blackScreen = document.getElementById('blackScreen');
+            const starfield = document.getElementById('starfield');
+
+            page4.classList.add('fade-out');
+
+            setTimeout(() => {
+                starfield.style.transition = 'opacity 1.5s ease';
+                starfield.style.opacity = '0';
+            }, 400);
+
+            setTimeout(() => {
+                blackScreen.classList.add('active');
+            }, 1200);
+
+            setTimeout(() => {
+                page4.classList.remove('active', 'fade-out');
+                blackScreen.classList.remove('active');
+                starfield.style.opacity = '1';
+
+                const page5 = document.getElementById('page5');
+                page5.classList.add('active');
+
+                const fadeElements = page5.querySelectorAll('.fade-in');
+                fadeElements.forEach(el => {
+                    el.style.animation = 'none';
+                    el.offsetHeight;
+                    el.style.animation = '';
+                });
+            }, 3000);
+        }
+
+        if (!isTouchDevice) {
+            let ticking = false;
+            document.addEventListener('mousemove', (e) => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const moveX = (e.clientX - window.innerWidth / 2) / 100;
+                        const moveY = (e.clientY - window.innerHeight / 2) / 100;
+
+                        const activePage = document.querySelector('.page.active .content');
+                        if (activePage) {
+                            activePage.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                        }
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const initParticles = () => {
+                createStars();
+                createFlowers();
+                createSparkles();
+                createLightRays();
+            };
+
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(initParticles, { timeout: 2000 });
+            } else {
+                setTimeout(initParticles, 100);
+            }
+
+            const typewriterElement = document.getElementById('typewriter-text');
+            const text = 'If you are here, it means my silence was not enough.';
+
+            setTimeout(() => {
+                typeWriter(text, typewriterElement, 100);
+            }, 800);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            const stars = document.getElementById('starfield');
+            if (document.hidden) {
+                stars.style.animationPlayState = 'paused';
+            } else {
+                stars.style.animationPlayState = 'running';
+            }
+        });
+    </script>
+</body>
+</html>
